@@ -1,0 +1,50 @@
+/* General styles */
+.page-container {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  .title {
+    font-size: 24px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+  }
+  
+  .parking-section {
+    margin-bottom: 30px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .parking-grid {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .parking-spot {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #d9534f; /* Red border */
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    color: #555;
+    background-color: #f9f9f9;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+  
+  .parking-spot:hover {
+    background-color: #e8f5e9; /* Light green on hover */
+  }
+  
