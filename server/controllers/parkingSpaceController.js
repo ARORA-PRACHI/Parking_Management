@@ -1,9 +1,24 @@
 const Parking = require('../models/parkingSpaceModel');
+const Wallet = require('../models/walletModel');  // Import the Wallet model
+const { deductFees } = require('../controllers/walletControllers');
 
 // Register a vehicle and reserve a slot
 const registerVehicle = async (req, res) => {
     try {
-        const { licensePlate, owner, vehicleType, fuelType } = req.body;
+        const { userName, licensePlate, vehicleType, fuelType } = req.body;
+
+        // Define valid enum values
+        const validVehicleTypes = ['car', 'bike', 'truck','Car', 'Bike', 'Truck'];
+        const validFuelTypes = ['petrol', 'diesel', 'electric', 'hybrid'];
+
+        // Validate vehicleType and fuelType
+        if (!validVehicleTypes.includes(vehicleType)) {
+            return res.status(400).json({ message: 'Invalid vehicle type. Valid options are car, bike, truck.' });
+        }
+
+        if (!validFuelTypes.includes(fuelType)) {
+            return res.status(400).json({ message: 'Invalid fuel type. Valid options are petrol, diesel, electric, hybrid.' });
+        }
 
         const parking = await Parking.findOne();
         if (!parking) return res.status(404).json({ message: 'Parking lot not initialized.' });
@@ -20,11 +35,23 @@ const registerVehicle = async (req, res) => {
             return res.status(400).json({ message: 'Vehicle already registered.' });
         }
 
+        // Check if the user already has a wallet
+        const wallet = await Wallet.findOne({ userName });
+        if (!wallet) {
+            return res.status(400).json({ message: 'Wallet not found. Please add funds first.' });
+        }
+
+        // Deduct parking fees using walletController
+        const deductResult = await deductFees(userName, vehicleType);
+        if (!deductResult.success) {
+            return res.status(400).json({ message: deductResult.message });
+        }
+
         // Reserve the slot and register the vehicle
         availableSlot.status = 'reserved';
         const newVehicle = {
             licensePlate,
-            owner,
+            userName,
             plotNumber: availableSlot.number,
             vehicleType,
             fuelType,
@@ -33,7 +60,7 @@ const registerVehicle = async (req, res) => {
 
         await parking.save();
         res.status(201).json({
-            message: `Vehicle registered and slot ${availableSlot.number} reserved.`,
+            message: `Vehicle registered, ₹${deductResult.message}. Slot ${availableSlot.number} reserved.`,
             vehicle: newVehicle,
         });
     } catch (error) {
